@@ -10,24 +10,38 @@ function inputBusName() {
         `https://data.etabus.gov.hk/v1/transport/kmb/route/`
       );
       const result = await response.json();
+      const routeKeys = {};
+      result.data.forEach((d) => {
+        if (d.route.indexOf(v.target.value) !== -1 && v.target.value !== "") {
+          routeKeys[d.route] = {};
+          routeKeys[d.route].orig = [];
+          routeKeys[d.route].dest = [];
+          routeKeys[d.route].data = [];
+        }
+      });
       result.data.forEach((d) => {
         if (
           d.route.indexOf(v.target.value) !== -1 &&
-          d.bound === "I" &&
-          d["service_type"] === "1" &&
-          v.target.value !== ""
+          (!routeKeys[d.route]["orig"].includes(`${d["orig_tc"]}`) ||
+            !routeKeys[d.route]["dest"].includes(`${d["dest_tc"]}`))
         ) {
-          addLineContainer(d.route);
+          routeKeys[d.route]["orig"].push(`${d["orig_tc"]}`);
+          routeKeys[d.route]["dest"].push(`${d["dest_tc"]}`);
+          routeKeys[d.route]["data"].push(d);
         }
+      });
+      Object.keys(routeKeys).forEach((d) => {
+        const routeData = routeKeys[d].data;
+        addLineContainer(d, routeData);
       });
     } catch (error) {
       console.error(error);
     }
   });
-} // English upper form
+}
 inputBusName();
 
-function addLineContainer(route) {
+function addLineContainer(route, routeData) {
   const headcontainer = document.querySelector(".container");
   const titlecontainer = document.createElement("div");
   const title = document.createElement("h2");
@@ -42,48 +56,46 @@ function addLineContainer(route) {
   titlecontainer.appendChild(todirction);
   titlecontainer.appendChild(buttoncontainer);
   titlecontainer.appendChild(resultcontainer);
-  searchResult(resultcontainer, buttoncontainer, route, "outbound");
-  searchResult(resultcontainer, buttoncontainer, route, "inbound");
+  routeData.forEach((d) => {
+    if (d.bound === "O") {
+      searchResult(resultcontainer, buttoncontainer, route, "outbound", d);
+    } else if (d.bound === "I") {
+      searchResult(resultcontainer, buttoncontainer, route, "inbound", d);
+    }
+  });
 }
 
 async function searchResult(
   resultcontainer,
   buttoncontainer,
   route,
-  direction
+  direction,
+  routeda
 ) {
   try {
-    const lineResponse = await fetch(
-      `https://data.etabus.gov.hk/v1/transport/kmb/route/${route}/${direction}/1`
-    );
-    const lineResult = await lineResponse.json();
     const stopResponse = await fetch(
-      `https://data.etabus.gov.hk/v1/transport/kmb/route-stop/${route}/${direction}/1`
+      `https://data.etabus.gov.hk/v1/transport/kmb/route-stop/${route}/${direction}/${routeda["service_type"]}`
     );
     const stopResult = await stopResponse.json();
-    let stopData = stopResult.data;
-    let lineData = lineResult.data;
-    addLineButton(resultcontainer, buttoncontainer, lineData, stopData, route);
+    const staARR = [];
+    stopResult.data.forEach((s) => {
+      staARR.push(s);
+    });
+    addLineButton(resultcontainer, buttoncontainer, routeda, staARR);
   } catch (error) {
     console.error(error);
   }
 }
 
-function addLineButton(
-  resultcontainer,
-  buttoncontainer,
-  lineData,
-  stopData,
-  route
-) {
+function addLineButton(resultcontainer, buttoncontainer, routeda, staARR) {
   const selebtn = document.createElement("button");
   selebtn.className = "selebtnstyle";
-  selebtn.textContent = `${lineData["orig_tc"]} to ${lineData["dest_tc"]}`;
+  selebtn.textContent = `${routeda["orig_tc"]} to ${routeda["dest_tc"]}`;
   buttoncontainer.appendChild(selebtn);
   selebtn.addEventListener("click", function () {
-    clearSta(route);
-    stopData.forEach((s) => {
-      showSta(s, resultcontainer, route);
+    clearSta(routeda.route);
+    staARR.forEach((s) => {
+      showSta(s, resultcontainer);
     });
   });
 }
@@ -113,6 +125,6 @@ function clearData() {
 }
 
 function clearSta(route) {
-  const staContainer = document.getElementById(`${route}`);
-  staContainer.innerHTML = "";
+  const stacontainer = document.getElementById(`${route}`);
+  stacontainer.innerHTML = "";
 }
