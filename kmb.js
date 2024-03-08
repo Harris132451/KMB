@@ -1,9 +1,3 @@
-// // fetch
-// https: //data.etabus.gov.hk/
-// // bus name
-// // line /v1/transport/kmb/route/{route}/{direction}/{service_type}
-// findsta /v1/transport/kmb/routestop/{route}/{direction}/{service_type}
-// // sta name /v1/transport/kmb/stop/{stop_id}
 function inputBusName() {
   const input = document.getElementById("findname");
   input.addEventListener("input", function (v) {
@@ -122,13 +116,3 @@ function clearSta(route) {
   const staContainer = document.getElementById(`${route}`);
   staContainer.innerHTML = "";
 }
-
-//for input function
-// const input = document.querySelector("input");
-// const log = document.getElementById("values");
-
-// input.addEventListener("input", updateValue);
-
-// function updateValue(e) {
-//   log.textContent = e.target.value;
-// }
