@@ -1,7 +1,9 @@
+document.addEventListener("DOMContentLoaded", function () {
+  inputBusName();
+});
 function inputBusName() {
   const input = document.getElementById("findname");
   input.addEventListener("input", function (v) {
-    clearResult();
     clearData();
   });
   input.addEventListener("input", async function (v) {
@@ -39,7 +41,6 @@ function inputBusName() {
     }
   });
 }
-inputBusName();
 
 function addLineContainer(route, routeData) {
   const headcontainer = document.querySelector(".container");
@@ -47,7 +48,7 @@ function addLineContainer(route, routeData) {
   const title = document.createElement("h2");
   const todirction = document.createElement("div");
   const buttoncontainer = document.createElement("div");
-  const resultcontainer = document.createElement("div");
+  const resultcontainer = document.createElement("ol");
   title.textContent = `${route}`;
   todirction.textContent = "Choose Direction : ";
   resultcontainer.id = `${route}`;
@@ -106,22 +107,17 @@ async function showSta(stopid, resultcontainer) {
       `https://data.etabus.gov.hk/v1/transport/kmb/stop/${stopid.stop}`
     );
     const stopNameResult = await stopNameResponse.json();
-    const stopName = document.createElement("div");
-    stopName.textContent = stopNameResult.data["name_tc"];
+    const stopName = document.createElement("li");
+    stopName.textContent = `${stopNameResult.data["name_tc"]}`;
     resultcontainer.appendChild(stopName);
   } catch (error) {
     console.error(error);
   }
 }
 
-function clearResult() {
+function clearData() {
   const headcontainer = document.querySelector(".container");
   headcontainer.innerHTML = "";
-}
-
-function clearData() {
-  const maincontainer = document.querySelector(".maincontainer");
-  maincontainer.innerHTML = "";
 }
 
 function clearSta(route) {
