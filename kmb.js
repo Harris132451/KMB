@@ -92,23 +92,35 @@ function addLineButton(resultcontainer, buttoncontainer, routeda, staARR) {
   const selebtn = document.createElement("button");
   selebtn.className = "selebtnstyle";
   selebtn.textContent = `${routeda["orig_tc"]} to ${routeda["dest_tc"]}`;
+  let resultARR = [];
+  staARR.forEach((s) => {
+    getSta(s, resultARR);
+  });
   buttoncontainer.appendChild(selebtn);
   selebtn.addEventListener("click", function () {
     clearSta(routeda.route);
-    staARR.forEach((s) => {
+    resultARR.forEach((s) => {
       showSta(s, resultcontainer);
     });
   });
 }
 
-async function showSta(stopid, resultcontainer) {
+async function getSta(stopid, ARR) {
   try {
     const stopNameResponse = await fetch(
       `https://data.etabus.gov.hk/v1/transport/kmb/stop/${stopid.stop}`
     );
     const stopNameResult = await stopNameResponse.json();
+    return ARR.push(stopNameResult.data["name_tc"]);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function showSta(stop, resultcontainer) {
+  try {
     const stopName = document.createElement("li");
-    stopName.textContent = `${stopNameResult.data["name_tc"]}`;
+    stopName.textContent = `${stop}`;
     resultcontainer.appendChild(stopName);
   } catch (error) {
     console.error(error);
