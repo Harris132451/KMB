@@ -88,40 +88,34 @@ async function searchResult(
   }
 }
 
-function addLineButton(resultcontainer, buttoncontainer, routeda, staARR) {
+async function addLineButton(
+  resultcontainer,
+  buttoncontainer,
+  routeda,
+  staARR
+) {
   const selebtn = document.createElement("button");
   selebtn.className = "selebtnstyle";
   selebtn.textContent = `${routeda["orig_tc"]} to ${routeda["dest_tc"]}`;
-  let resultARR = [];
-  staARR.forEach((s) => {
-    getSta(s, resultARR);
-  });
   buttoncontainer.appendChild(selebtn);
-  selebtn.addEventListener("click", function () {
+  selebtn.addEventListener("click", async function () {
     clearSta(routeda.route);
-    resultARR.forEach((s) => {
-      showSta(s, resultcontainer);
+    let resultARR = await Promise.all(staARR.map((s) => showSta(s)));
+    resultARR.forEach((r) => {
+      resultcontainer.appendChild(r);
     });
   });
 }
 
-async function getSta(stopid, ARR) {
+async function showSta(stopid) {
   try {
     const stopNameResponse = await fetch(
       `https://data.etabus.gov.hk/v1/transport/kmb/stop/${stopid.stop}`
     );
     const stopNameResult = await stopNameResponse.json();
-    return ARR.push(stopNameResult.data["name_tc"]);
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-function showSta(stop, resultcontainer) {
-  try {
     const stopName = document.createElement("li");
-    stopName.textContent = `${stop}`;
-    resultcontainer.appendChild(stopName);
+    stopName.textContent = `${stopNameResult.data["name_tc"]}`;
+    return stopName;
   } catch (error) {
     console.error(error);
   }
