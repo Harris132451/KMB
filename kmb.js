@@ -13,8 +13,9 @@ function inputBusName() {
       );
       const result = await response.json();
       const routeKeys = {};
+      const inputkey = v.target.value.toUpperCase();
       result.data.forEach((d) => {
-        if (d.route.indexOf(v.target.value) !== -1 && v.target.value !== "") {
+        if (d.route.indexOf(inputkey) !== -1 && inputkey !== "") {
           routeKeys[d.route] = {};
           routeKeys[d.route].orig = [];
           routeKeys[d.route].dest = [];
@@ -23,7 +24,7 @@ function inputBusName() {
       });
       result.data.forEach((d) => {
         if (
-          d.route.indexOf(v.target.value) !== -1 &&
+          d.route.indexOf(inputkey) !== -1 &&
           (!routeKeys[d.route]["orig"].includes(`${d["orig_tc"]}`) ||
             !routeKeys[d.route]["dest"].includes(`${d["dest_tc"]}`))
         ) {
